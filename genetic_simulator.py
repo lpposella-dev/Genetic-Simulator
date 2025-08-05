@@ -410,6 +410,10 @@ class GeneticSimulator:
         if father_value == mother_value:
             return father_value
         
+        # Special handling for ethnicity - should inherit from parents, not random
+        if feature == 'ethnicity':
+            return self.inherit_ethnicity(father_value, mother_value)
+        
         # Complex genetic inheritance with multiple factors
         inheritance_score = self.calculate_inheritance_score(feature, father_value, mother_value)
         
@@ -427,6 +431,62 @@ class GeneticSimulator:
         
         # Select based on complex probability distribution
         return self.select_from_probability_distribution(final_probabilities)
+    
+    def inherit_ethnicity(self, father_ethnicity, mother_ethnicity):
+        """Inherit ethnicity from parents with realistic probabilities"""
+        # Define ethnicity compatibility and inheritance patterns
+        ethnicity_inheritance = {
+            'occidental': {
+                'occidental': 1.0,      # 100% chance if both occidental
+                'european': 0.7,         # 70% chance occidental, 30% european
+                'asiatic': 0.1,          # 10% chance occidental, 90% asiatic
+                'mid-eastern': 0.1,      # 10% chance occidental, 90% mid-eastern
+                'african': 0.05          # 5% chance occidental, 95% african
+            },
+            'european': {
+                'european': 1.0,         # 100% chance if both european
+                'occidental': 0.7,       # 70% chance european, 30% occidental
+                'asiatic': 0.2,          # 20% chance european, 80% asiatic
+                'mid-eastern': 0.15,     # 15% chance european, 85% mid-eastern
+                'african': 0.1           # 10% chance european, 90% african
+            },
+            'asiatic': {
+                'asiatic': 1.0,          # 100% chance if both asiatic
+                'occidental': 0.1,       # 10% chance asiatic, 90% occidental
+                'european': 0.2,         # 20% chance asiatic, 80% european
+                'mid-eastern': 0.3,      # 30% chance asiatic, 70% mid-eastern
+                'african': 0.05          # 5% chance asiatic, 95% african
+            },
+            'mid-eastern': {
+                'mid-eastern': 1.0,      # 100% chance if both mid-eastern
+                'occidental': 0.1,       # 10% chance mid-eastern, 90% occidental
+                'european': 0.15,        # 15% chance mid-eastern, 85% european
+                'asiatic': 0.3,          # 30% chance mid-eastern, 70% asiatic
+                'african': 0.2           # 20% chance mid-eastern, 80% african
+            },
+            'african': {
+                'african': 1.0,          # 100% chance if both african
+                'occidental': 0.05,      # 5% chance african, 95% occidental
+                'european': 0.1,         # 10% chance african, 90% european
+                'asiatic': 0.05,         # 5% chance african, 95% asiatic
+                'mid-eastern': 0.2       # 20% chance african, 80% mid-eastern
+            }
+        }
+        
+        # Get inheritance probability for this combination
+        if father_ethnicity in ethnicity_inheritance and mother_ethnicity in ethnicity_inheritance[father_ethnicity]:
+            prob_father = ethnicity_inheritance[father_ethnicity][mother_ethnicity]
+        elif mother_ethnicity in ethnicity_inheritance and father_ethnicity in ethnicity_inheritance[mother_ethnicity]:
+            prob_father = ethnicity_inheritance[mother_ethnicity][father_ethnicity]
+        else:
+            # Fallback: 50/50 chance
+            prob_father = 0.5
+        
+        # Decide which ethnicity to inherit
+        if random.random() < prob_father:
+            return father_ethnicity
+        else:
+            return mother_ethnicity
     
     def calculate_inheritance_score(self, feature, father_value, mother_value):
         """Calculate inheritance score based on genetic distance and compatibility"""
@@ -524,10 +584,7 @@ class GeneticSimulator:
             # Apply Hardy-Weinberg equilibrium considerations
             hw_factor = self.calculate_hardy_weinberg_factor(feature, option, base_probabilities)
             
-            # Special handling for ethnicity based on skin color
-            if feature == 'ethnicity':
-                skin_color_factor = self.calculate_ethnicity_skin_correlation(option)
-                base_probabilities[option] *= skin_color_factor
+
             
             # Combine all factors
             final_prob = base_probabilities[option] * (1 + parent_influence) * epistatic_factor * hw_factor
@@ -535,59 +592,7 @@ class GeneticSimulator:
         
         return base_probabilities
     
-    def calculate_ethnicity_skin_correlation(self, ethnicity):
-        """Calculate ethnicity probability adjustment based on skin color"""
-        # Use parent skin colors to estimate baby's likely skin color
-        father_skin = self.father_data.get('skin_color', 'brown')
-        mother_skin = self.mother_data.get('skin_color', 'brown')
-        
-        # Simple estimation of baby's likely skin color
-        if father_skin == mother_skin:
-            estimated_skin = father_skin
-        else:
-            # If parents have different skin colors, estimate based on dominance
-            if 'black' in [father_skin, mother_skin]:
-                estimated_skin = 'black'
-            elif 'brown' in [father_skin, mother_skin]:
-                estimated_skin = 'brown'
-            else:
-                estimated_skin = 'white'
-        
-        # Define correlation factors between skin color and ethnicity
-        # Occidental is less likely with darker skin colors
-        correlation_factors = {
-            'occidental': {
-                'black': 0.3,    # Much lower probability
-                'brown': 0.6,    # Lower probability
-                'white': 1.5     # Higher probability
-            },
-            'european': {
-                'black': 0.4,    # Lower probability
-                'brown': 0.8,    # Slightly lower
-                'white': 1.3     # Higher probability
-            },
-            'asiatic': {
-                'black': 1.2,    # Higher probability
-                'brown': 1.1,    # Slightly higher
-                'white': 0.9     # Slightly lower
-            },
-            'mid-eastern': {
-                'black': 1.1,    # Slightly higher
-                'brown': 1.2,    # Higher probability
-                'white': 0.8     # Lower probability
-            },
-            'african': {
-                'black': 1.4,    # Much higher probability
-                'brown': 1.3,    # Higher probability
-                'white': 0.5     # Much lower probability
-            }
-        }
-        
-        # Get the correlation factor for this ethnicity and estimated skin color
-        if ethnicity in correlation_factors and estimated_skin in correlation_factors[ethnicity]:
-            return correlation_factors[ethnicity][estimated_skin]
-        
-        return 1.0  # No adjustment if not found
+
     
     def calculate_epistatic_interactions(self, feature, trait):
         """Calculate epistatic interactions between traits"""

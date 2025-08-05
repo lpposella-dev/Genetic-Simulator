@@ -35,7 +35,7 @@ The app implements realistic genetic inheritance patterns:
 - **Realistic Twin Generation**: 
   - Identical twins: 0.3% chance (same for everyone)
   - Non-identical twins: 3% base rate, 10% with family history
-- **Skin Color-Ethnicity Correlation**: Ethnicity probabilities adjust based on inherited skin color
+- **Realistic Ethnicity Inheritance**: Baby inherits ethnicity from parents with realistic probabilities
 
 ## How to Use
 
@@ -130,7 +130,7 @@ This simulator implements sophisticated genetic algorithms inspired by real popu
 - **Normal Distribution**: For genetic drift simulation
 - **Inverse Transform Sampling**: Advanced probability selection
 - **Twin Probability Modeling**: Based on ethnicity, skin color, and genetic factors
-- **Skin Color-Ethnicity Correlation**: Realistic trait correlation modeling
+- **Ethnicity Inheritance Patterns**: Realistic parent-to-child ethnicity inheritance
 
 ### Scientific Concepts:
 - **Dominance Strength**: Variable dominance based on trait frequency
@@ -139,7 +139,7 @@ This simulator implements sophisticated genetic algorithms inspired by real popu
 - **Epistasis**: How one gene affects another's expression
 - **Population Genetics**: Hardy-Weinberg equilibrium considerations
 - **Twinning Genetics**: Realistic twin probability based on genetic factors
-- **Trait Correlation**: Skin color and ethnicity correlation modeling
+- **Ethnicity Inheritance**: Realistic parent-to-child ethnicity inheritance patterns
 
 ### Real-World Complexity:
 While this simulator is for educational purposes, it incorporates many real genetic concepts:
